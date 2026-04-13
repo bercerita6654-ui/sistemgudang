@@ -152,7 +152,7 @@
                             </div>
                         </div>
                         
-                        <!-- LIST KERANJANG TRANSFER (Tabel Editing Cepat) -->
+                        <!-- LIST KERANJANG TRANSFER -->
                         <div id="transfer-cart-container" class="mt-6 border border-orange-100 bg-white rounded-2xl p-4 shadow-sm hidden">
                             <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
                                 <h4 class="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-1.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg> Edit Langsung Qty & Tujuan</h4>
@@ -582,7 +582,7 @@
     </div>
 
     <script>
-        var API_URL = "https://script.google.com/macros/s/AKfycbw7r1WzZPKwddIfM88iLEEGnFVYBJD2u4f3NpO33xhS74duAXyuILExIkEiamTNjff-/exec";
+        var API_URL = "https://script.google.com/macros/s/AKfycbz3fn9WbONW75V4D4Si8iXUotxE2FTIXs6icqmMx1sa8vcCrfr1QR0EaG-YNop_sfJE/exec";
         
         var orderDatabase = []; 
         var currentBuyer = null; 
@@ -1318,11 +1318,11 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.7); // Kompresi ditingkatkan
+                        var base64Data = canvas.toDataURL(mimeType, 0.5);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         var payload = {
-                            action: 'upload_image',
+                            action: 'upload_image', // Kita seragamkan menjadi upload_image
                             filename: 'Bukti_Susulan_' + Date.now() + '_' + index + '.png',
                             mimeType: mimeType,
                             base64: base64Data,
@@ -1331,6 +1331,7 @@
                         };
 
                         fetchGAS(payload).then(function(upRes) {
+                            console.log("Upload Res:", upRes);
                             if (upRes) {
                                 var returnedUrl = upRes.url || upRes.fileUrl || upRes.link || (typeof upRes.data === 'string' ? upRes.data : null);
                                 if (returnedUrl) {
@@ -1920,7 +1921,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.7);
+                        var base64Data = canvas.toDataURL(mimeType, 0.85);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         fetchGAS({
@@ -2668,8 +2669,8 @@
                         var img = new Image();
                         img.onload = function() {
                             var canvas = document.createElement('canvas');
-                            var MAX_WIDTH = 600; 
-                            var MAX_HEIGHT = 600;
+                            var MAX_WIDTH = 800; 
+                            var MAX_HEIGHT = 800;
                             var width = img.width;
                             var height = img.height;
 
@@ -2834,6 +2835,7 @@
             }
         };
 
+        // Menambahkan Event Listener untuk menampilkan Preview Gambar Server (opsional tapi membantu)
         document.addEventListener('DOMContentLoaded', function() {
             var uf = document.getElementById('upload-file');
             if(uf) {
