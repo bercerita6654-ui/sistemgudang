@@ -582,7 +582,7 @@
     </div>
 
     <script>
-        var API_URL = "https://script.google.com/macros/s/AKfycbz3fn9WbONW75V4D4Si8iXUotxE2FTIXs6icqmMx1sa8vcCrfr1QR0EaG-YNop_sfJE/exec";
+        var API_URL = "https://script.google.com/macros/s/AKfycbw7r1WzZPKwddIfM88iLEEGnFVYBJD2u4f3NpO33xhS74duAXyuILExIkEiamTNjff-/exec";
         
         var orderDatabase = []; 
         var currentBuyer = null; 
@@ -633,7 +633,10 @@
                         return JSON.parse(text);
                     } catch (e) {
                         console.error("GAS Error Response:", text);
-                        throw new Error("Respon server Google tidak valid. Periksa deployment Apps Script Anda.");
+                        if (text.toLowerCase().includes("html")) {
+                             throw new Error("Respon server berupa HTML. Pastikan hak akses deployment adalah 'Anyone'.");
+                        }
+                        throw new Error("Respon server Google tidak valid (" + text.substring(0, 30) + "...). Periksa Code.gs Anda.");
                     }
                 });
             });
@@ -1318,11 +1321,11 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.5);
+                        var base64Data = canvas.toDataURL(mimeType, 0.6);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         var payload = {
-                            action: 'upload_image', // Kita seragamkan menjadi upload_image
+                            action: 'upload_image',
                             filename: 'Bukti_Susulan_' + Date.now() + '_' + index + '.png',
                             mimeType: mimeType,
                             base64: base64Data,
@@ -1331,7 +1334,6 @@
                         };
 
                         fetchGAS(payload).then(function(upRes) {
-                            console.log("Upload Res:", upRes);
                             if (upRes) {
                                 var returnedUrl = upRes.url || upRes.fileUrl || upRes.link || (typeof upRes.data === 'string' ? upRes.data : null);
                                 if (returnedUrl) {
@@ -1342,7 +1344,6 @@
                             }
                             uploadSequential(index + 1, collectedUrls, callback);
                         }).catch(function(err) { 
-                            console.error('Upload Error:', err);
                             uploadSequential(index + 1, collectedUrls, callback); 
                         });
                     };
@@ -1921,7 +1922,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.85);
+                        var base64Data = canvas.toDataURL(mimeType, 0.6);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         fetchGAS({
@@ -2669,8 +2670,8 @@
                         var img = new Image();
                         img.onload = function() {
                             var canvas = document.createElement('canvas');
-                            var MAX_WIDTH = 800; 
-                            var MAX_HEIGHT = 800;
+                            var MAX_WIDTH = 600; 
+                            var MAX_HEIGHT = 600;
                             var width = img.width;
                             var height = img.height;
 
@@ -2694,7 +2695,7 @@
                             ctx.drawImage(img, 0, 0, width, height);
 
                             var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                            var base64Data = canvas.toDataURL(mimeType, 0.85);
+                            var base64Data = canvas.toDataURL(mimeType, 0.6);
                             if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                             fetchGAS({
@@ -2883,8 +2884,8 @@
                 img.onload = function() {
                     try {
                         var canvas = document.createElement('canvas');
-                        var MAX_WIDTH = 800; 
-                        var MAX_HEIGHT = 800;
+                        var MAX_WIDTH = 600; 
+                        var MAX_HEIGHT = 600;
                         var width = img.width;
                         var height = img.height;
 
@@ -2910,7 +2911,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.85);
+                        var base64Data = canvas.toDataURL(mimeType, 0.6);
                         
                         if(base64Data.indexOf(',') > -1) {
                             base64Data = base64Data.split(',')[1];
