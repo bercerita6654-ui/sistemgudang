@@ -1321,14 +1321,17 @@
                         var base64Data = canvas.toDataURL(mimeType, 0.5);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
-                        fetchGAS({
-                            action: 'upload_image',
+                        var payload = {
+                            action: 'upload_image', // Kita seragamkan menjadi upload_image
                             filename: 'Bukti_Susulan_' + Date.now() + '_' + index + '.png',
                             mimeType: mimeType,
                             base64: base64Data,
                             data: base64Data,
-                            file: base64Data
-                        }).then(function(upRes) {
+                            file: base64Data // Berbagai variasi nama parameter
+                        };
+
+                        fetchGAS(payload).then(function(upRes) {
+                            console.log("Upload Res:", upRes);
                             if (upRes) {
                                 var returnedUrl = upRes.url || upRes.fileUrl || upRes.link || (typeof upRes.data === 'string' ? upRes.data : null);
                                 if (returnedUrl) {
@@ -1339,6 +1342,7 @@
                             }
                             uploadSequential(index + 1, collectedUrls, callback);
                         }).catch(function(err) { 
+                            console.error('Upload Error:', err);
                             uploadSequential(index + 1, collectedUrls, callback); 
                         });
                     };
@@ -1892,8 +1896,8 @@
                     var img = new Image();
                     img.onload = function() {
                         var canvas = document.createElement('canvas');
-                        var MAX_WIDTH = 600; 
-                        var MAX_HEIGHT = 600;
+                        var MAX_WIDTH = 800; 
+                        var MAX_HEIGHT = 800;
                         var width = img.width;
                         var height = img.height;
 
@@ -1917,7 +1921,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.5);
+                        var base64Data = canvas.toDataURL(mimeType, 0.85);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         fetchGAS({
@@ -1938,6 +1942,7 @@
                             }
                             uploadSequential(index + 1, collectedUrls, callback);
                         }).catch(function(err) { 
+                            console.error('Upload Terima Error:', err);
                             uploadSequential(index + 1, collectedUrls, callback); 
                         });
                     };
@@ -1950,7 +1955,7 @@
 
             uploadSequential(0, [], function(validUrls) {
                 if(validUrls.length === 0) {
-                    showModal('warning', 'Peringatan', 'Gagal mengunggah foto laporan ke server, namun konfirmasi penerimaan akan tetap dilanjutkan tanpa foto.');
+                    showModal('warning', 'Peringatan', 'Gagal mengunggah foto laporan ke Drive, namun konfirmasi penerimaan akan tetap dilanjutkan tanpa foto.');
                 }
                 processSave(validUrls);
             });
@@ -2673,7 +2678,7 @@
                             ctx.drawImage(img, 0, 0, width, height);
 
                             var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                            var base64Data = canvas.toDataURL(mimeType, 0.5);
+                            var base64Data = canvas.toDataURL(mimeType, 0.85);
                             if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                             fetchGAS({
@@ -3176,8 +3181,8 @@
 
                 gridHtml += '<div class="bg-white rounded-xl border border-slate-100 p-2 shadow-sm flex flex-col group hover:shadow-xl transition-all duration-300 relative overflow-hidden">' +
                     '<div class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-black tracking-widest px-1.5 py-1 rounded z-10 shadow-sm border border-slate-700/50">' + p.sku + '</div>' +
-                    '<div class="h-24 overflow-hidden rounded-lg bg-slate-50 mb-2 relative flex items-center justify-center cursor-zoom-in" onclick="openImageModal(this.querySelector(\'img\'))">' +
-                        generateSafeImageTag(p.img, p.driveId, 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-500') +
+                    '<div class="aspect-square w-full overflow-hidden rounded-lg bg-slate-50 mb-2 relative flex items-center justify-center cursor-zoom-in p-1" onclick="openImageModal(this.querySelector(\'img\'))">' +
+                        generateSafeImageTag(p.img, p.driveId, 'w-full h-full object-contain group-hover:scale-110 transition-transform duration-500') +
                     '</div>' +
                     '<div class="flex-1 flex flex-col px-0.5">' +
                         '<span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5 truncate">' + p.merk + '</span>' +
