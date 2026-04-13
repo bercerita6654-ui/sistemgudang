@@ -582,7 +582,7 @@
     </div>
 
     <script>
-        var API_URL = "https://script.google.com/macros/s/AKfycbxjFvyATpVwfb592IVvN-CpslH55BKOalMAV2R02Gx4TKx5JcqY-a_LIL5XptjF7mRf/exec";
+        var API_URL = "https://script.google.com/macros/s/AKfycbw7r1WzZPKwddIfM88iLEEGnFVYBJD2u4f3NpO33xhS74duAXyuILExIkEiamTNjff-/exec";
         
         var orderDatabase = []; 
         var currentBuyer = null; 
@@ -628,7 +628,14 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             }).then(function(response) {
-                return response.json();
+                return response.text().then(function(text) {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("GAS Error Response:", text);
+                        throw new Error("Respon server Google tidak valid. Periksa deployment Apps Script Anda.");
+                    }
+                });
             });
         }
 
