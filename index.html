@@ -1318,20 +1318,19 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.5);
+                        var base64Data = canvas.toDataURL(mimeType, 0.7); // Kompresi ditingkatkan
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         var payload = {
-                            action: 'upload_image', // Kita seragamkan menjadi upload_image
+                            action: 'upload_image',
                             filename: 'Bukti_Susulan_' + Date.now() + '_' + index + '.png',
                             mimeType: mimeType,
                             base64: base64Data,
                             data: base64Data,
-                            file: base64Data // Berbagai variasi nama parameter
+                            file: base64Data
                         };
 
                         fetchGAS(payload).then(function(upRes) {
-                            console.log("Upload Res:", upRes);
                             if (upRes) {
                                 var returnedUrl = upRes.url || upRes.fileUrl || upRes.link || (typeof upRes.data === 'string' ? upRes.data : null);
                                 if (returnedUrl) {
@@ -1896,8 +1895,8 @@
                     var img = new Image();
                     img.onload = function() {
                         var canvas = document.createElement('canvas');
-                        var MAX_WIDTH = 800; 
-                        var MAX_HEIGHT = 800;
+                        var MAX_WIDTH = 600; 
+                        var MAX_HEIGHT = 600;
                         var width = img.width;
                         var height = img.height;
 
@@ -1921,7 +1920,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.85);
+                        var base64Data = canvas.toDataURL(mimeType, 0.7);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         fetchGAS({
@@ -2352,9 +2351,12 @@
                 var rHtml = '';
                 for(var i=0; i<matches.length; i++){
                     var p = matches[i];
-                    rHtml += '<div class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors" onclick="selectTransferProduct(\'' + p.sku + '\')">' +
-                        '<div class="font-black text-orange-600 text-[10px] uppercase tracking-widest">' + p.sku + '</div>' +
-                        '<div class="font-bold text-slate-700 text-sm mt-0.5 truncate">' + p.name + '</div>' +
+                    rHtml += '<div class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors flex justify-between items-center" onclick="selectTransferProduct(\'' + p.sku + '\', this)">' +
+                        '<div>' +
+                            '<div class="font-black text-orange-600 text-[10px] uppercase tracking-widest">' + p.sku + '</div>' +
+                            '<div class="font-bold text-slate-700 text-sm mt-0.5 truncate">' + p.name + '</div>' +
+                        '</div>' +
+                        '<span class="add-status text-[10px] font-black px-2 py-1 rounded bg-slate-100 text-slate-500 transition-colors">+ Tambah</span>' +
                     '</div>';
                 }
                 resultBox.innerHTML = rHtml;
@@ -2365,7 +2367,7 @@
             }
         };
 
-        window.selectTransferProduct = function(sku) {
+        window.selectTransferProduct = function(sku, el) {
             var p = null;
             for(var i=0; i<allProducts.length; i++) {
                 if(allProducts[i].sku === sku) { p = allProducts[i]; break; }
@@ -2394,12 +2396,25 @@
                         note: ''
                     });
                     renderTransferCartUI();
+                    
+                    if (el) {
+                        var badge = el.querySelector('.add-status');
+                        if (badge) {
+                            badge.textContent = '✓ Masuk';
+                            badge.className = 'add-status text-[10px] font-black px-2 py-1 rounded transition-colors bg-emerald-100 text-emerald-600';
+                        }
+                    }
                 } else {
-                    showModal('warning', 'Sudah Ada', 'Produk ini sudah ada di daftar transfer di bawah.');
+                    if (el) {
+                        var badge = el.querySelector('.add-status');
+                        if (badge) {
+                            badge.textContent = 'Sudah Ada';
+                            badge.className = 'add-status text-[10px] font-black px-2 py-1 rounded transition-colors bg-orange-100 text-orange-600';
+                        }
+                    } else {
+                        showModal('warning', 'Sudah Ada', 'Produk ini sudah ada di daftar transfer di bawah.');
+                    }
                 }
-                
-                document.getElementById('tf-search').value = '';
-                document.getElementById('sku-search-result').classList.add('hidden');
             }
         };
 
