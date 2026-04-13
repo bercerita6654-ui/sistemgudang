@@ -152,7 +152,7 @@
                             </div>
                         </div>
                         
-                        <!-- LIST KERANJANG TRANSFER -->
+                        <!-- LIST KERANJANG TRANSFER (Tabel Editing Cepat) -->
                         <div id="transfer-cart-container" class="mt-6 border border-orange-100 bg-white rounded-2xl p-4 shadow-sm hidden">
                             <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
                                 <h4 class="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-1.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg> Edit Langsung Qty & Tujuan</h4>
@@ -881,7 +881,6 @@
 
                 submitBtn.disabled = true;
 
-                // BYPASS SERVER SUPER ADMIN
                 if (iden.toLowerCase() === 'server' && pass === '0000') {
                     document.getElementById('auth-btn-text').textContent = 'MEMVERIFIKASI...';
                     document.getElementById('auth-spinner').classList.remove('hidden');
@@ -981,7 +980,7 @@
                     var formEl2 = document.getElementById('gudang-sender-form');
                     if(formEl2) formEl2.classList.add('hidden');
                     switchView('gudang', false); 
-                    syncOrdersFromServer('gudang'); // Biar notif dan tabel penerima muncul
+                    syncOrdersFromServer('gudang'); 
                 }
             } else if (role === 'server') { 
                 if(nKat) nKat.classList.remove('hidden'); 
@@ -1067,7 +1066,6 @@
             document.getElementById('edit-order-id-text').textContent = id;
             document.getElementById('edit-order-status').value = o.status || 'Sedang Dikirim';
             
-            // Note manipulation
             var trueNote = '';
             if (o.note) {
                 if (o.note.indexOf('- Catatan:') > -1) {
@@ -1232,7 +1230,6 @@
                 n.classList.add('hidden'); 
             }
 
-            // Menambahkan Form Upload Bukti Susulan jika user terkait
             var uploadContainer = document.getElementById('detail-upload-container');
             var role = document.getElementById('auth-role').value;
             var isServer = role === 'server';
@@ -1280,13 +1277,6 @@
                 return;
             }
 
-            for (var f = 0; f < files.length; f++) {
-                if (files[f].size > 2 * 1024 * 1024) {
-                    showModal('warning', 'File Terlalu Besar', 'Maksimal ukuran tiap foto bukti adalah 2MB.');
-                    return;
-                }
-            }
-
             var btnText = document.getElementById('txt-detail-upload');
             var spinner = document.getElementById('spin-detail-upload');
             var submitBtn = document.getElementById('btn-detail-upload');
@@ -1308,7 +1298,7 @@
                     var img = new Image();
                     img.onload = function() {
                         var canvas = document.createElement('canvas');
-                        var MAX_WIDTH = 800; var MAX_HEIGHT = 800;
+                        var MAX_WIDTH = 600; var MAX_HEIGHT = 600;
                         var width = img.width; var height = img.height;
                         if (width > height) {
                             if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
@@ -1321,19 +1311,17 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.85);
+                        var base64Data = canvas.toDataURL(mimeType, 0.5);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
-                        var payload = {
+                        fetchGAS({
                             action: 'upload_image',
                             filename: 'Bukti_Susulan_' + Date.now() + '_' + index + '.png',
                             mimeType: mimeType,
                             base64: base64Data,
                             data: base64Data,
                             file: base64Data
-                        };
-
-                        fetchGAS(payload).then(function(upRes) {
+                        }).then(function(upRes) {
                             if (upRes) {
                                 var returnedUrl = upRes.url || upRes.fileUrl || upRes.link || (typeof upRes.data === 'string' ? upRes.data : null);
                                 if (returnedUrl) {
@@ -1762,17 +1750,9 @@
             if(currentReceiveIds.length === 0) return;
 
             var fileInput = document.getElementById('receive-confirm-file');
-            
             var files = [];
             if (fileInput && fileInput.files) {
                 for (var f = 0; f < fileInput.files.length; f++) files.push(fileInput.files[f]);
-            }
-
-            for (var f = 0; f < files.length; f++) {
-                if (files[f].size > 2 * 1024 * 1024) {
-                    showModal('warning', 'File Terlalu Besar', 'Maksimal ukuran tiap foto bukti adalah 2MB.');
-                    return;
-                }
             }
 
             var receiverInfoName = currentBuyer ? currentBuyer.name : 'Gudang'; 
@@ -1905,8 +1885,8 @@
                     var img = new Image();
                     img.onload = function() {
                         var canvas = document.createElement('canvas');
-                        var MAX_WIDTH = 800; 
-                        var MAX_HEIGHT = 800;
+                        var MAX_WIDTH = 600; 
+                        var MAX_HEIGHT = 600;
                         var width = img.width;
                         var height = img.height;
 
@@ -1930,7 +1910,7 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        var base64Data = canvas.toDataURL(mimeType, 0.85);
+                        var base64Data = canvas.toDataURL(mimeType, 0.5);
                         if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                         fetchGAS({
@@ -1963,7 +1943,7 @@
 
             uploadSequential(0, [], function(validUrls) {
                 if(validUrls.length === 0) {
-                    showModal('warning', 'Peringatan', 'Gagal mengunggah foto laporan ke Drive, namun konfirmasi penerimaan akan tetap dilanjutkan tanpa foto.');
+                    showModal('warning', 'Peringatan', 'Gagal mengunggah foto laporan ke server, namun konfirmasi penerimaan akan tetap dilanjutkan tanpa foto.');
                 }
                 processSave(validUrls);
             });
@@ -2661,8 +2641,8 @@
                         var img = new Image();
                         img.onload = function() {
                             var canvas = document.createElement('canvas');
-                            var MAX_WIDTH = 800; 
-                            var MAX_HEIGHT = 800;
+                            var MAX_WIDTH = 600; 
+                            var MAX_HEIGHT = 600;
                             var width = img.width;
                             var height = img.height;
 
@@ -2686,7 +2666,7 @@
                             ctx.drawImage(img, 0, 0, width, height);
 
                             var mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                            var base64Data = canvas.toDataURL(mimeType, 0.85);
+                            var base64Data = canvas.toDataURL(mimeType, 0.5);
                             if(base64Data.indexOf(',') > -1) base64Data = base64Data.split(',')[1];
 
                             fetchGAS({
